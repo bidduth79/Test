@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Newspaper Photocard Template</title>
+  <style>
+    body{font-family: 'Georgia', serif; background:#eee; padding:24px; display:flex; gap:20px; justify-content:center}
+    .container{display:flex; gap:20px}
+    .controls{width:300px}
+    input[type=file], input[type=text], textarea{width:100%; margin-bottom:10px; padding:8px; border:1px solid #bbb; border-radius:4px}
+    button{padding:10px; border:0; background:#222; color:#fff; border-radius:6px; cursor:pointer}
+    .card{width:600px; background:#fff; padding:18px; border:1px solid #ccc; box-shadow:0 4px 15px rgba(0,0,0,0.1)}
+    .headline{font-size:20px; font-weight:700; border-bottom:2px solid #000; padding-bottom:8px}
+    .photo{width:100%; height:350px; background:#ddd; display:flex; justify-content:center; align-items:center; overflow:hidden}
+    .photo img{max-width:100%; max-height:100%; object-fit:cover}
+    .caption{margin-top:10px; font-size:16px}
+    .meta{margin-top:10px; display:flex; justify-content:space-between; font-size:14px; color:#666}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="controls">
+      <h3>Controls</h3>
+      <label>Upload Photo</label>
+      <input id="fileInput" type="file" accept="image/*">
+
+      <label>Headline</label>
+      <input id="headlineInput" type="text" value="YOUR CAPTION HERE">
+
+      <label>Caption</label>
+      <textarea id="captionInput" rows="3"></textarea>
+
+      <button id="downloadBtn">Download as PNG</button>
+      <button id="resetBtn" style="background:#777; margin-left:5px">Reset</button>
+    </div>
+
+    <div class="card" id="card">
+      <div class="headline" id="headlinePreview">YOUR CAPTION HERE</div>
+      <div class="photo" id="photoArea">Upload an image</div>
+      <div class="caption" id="captionPreview"></div>
+      <div class="meta">
+        <div>Photocard</div>
+        <div id="datePreview"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const fileInput = document.getElementById('fileInput');
+  const photoArea = document.getElementById('photoArea');
+  const headlineInput = document.getElementById('headlineInput');
+  const captionInput = document.getElementById('captionInput');
+  const headlinePreview = document.getElementById('headlinePreview');
+  const captionPreview = document.getElementById('captionPreview');
+  const datePreview = document.getElementById('datePreview');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const card = document.getElementById('card');
+
+  // auto date
+  datePreview.textContent = "Date: " + new Date().toLocaleDateString();
+
+  headlineInput.addEventListener('input', () => headlinePreview.textContent = headlineInput.value);
+  captionInput.addEventListener('input', () => captionPreview.textContent = captionInput.value);
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(file);
+    img.onload = () => {
+      photoArea.innerHTML = "";
+      photoArea.appendChild(img);
+    }
+  });
+
+  // download card as png
+  downloadBtn.addEventListener('click', async () => {
+    const canvas = document.createElement('canvas');
+    const rect = card.getBoundingClientRect();
+    canvas.width = rect.width * 2;
+    canvas.height = rect.height * 2;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2,2);
+
+    html2canvas(card).then(canvas2 => {
+      const a = document.createElement('a');
+      a.href = canvas2.toDataURL();
+      a.download = "photocard.png";
+      a.click();
+    });
+  });
+
+  resetBtn.addEventListener('click', () => {
+    headlineInput.value = "YOUR CAPTION HERE";
+    captionInput.value = "";
+    headlinePreview.textContent = "YOUR CAPTION HERE";
+    captionPreview.textContent = "";
+    photoArea.innerHTML = "Upload an image";
+    fileInput.value = "";
+    datePreview.textContent = "Date: " + new Date().toLocaleDateString();
+  });
+</script>
+
+<!-- html2canvas library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+</body>
+</html>
